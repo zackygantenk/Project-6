@@ -1,0 +1,78 @@
+1.composer create-project laravel/laravel:"^10.0" example-app
+2.buat DB
+3.composer require spatie/laravel-permission
+
+4.config/app.php file:
+
+'providers' => [
+    // ...
+    Spatie\Permission\PermissionServiceProvider::class,
+];
+
+5.php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+
+6. kernel.php tambahkan:
+'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+
+7.php artisan make:middleware AdminMiddleware
+
+8. tambhakan ke kernel.php :
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
+
+9. tambahkan ke AdminMiddleware:
+        if (!Auth::user()->hasRole('admin')) {
+            return response()->json(['message' => 'You are not admin'], 403);
+        }
+
+        return $next($request);
+
+10. buat seeder role,user dan admin = php artisan make:seeder
+
+11. RoleSeeder = use Spatie\Permission\Models\Role;
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'user']);
+
+12. UserSeeder =         $user = User::create([
+            'name' => 'User',
+            'email' => 'user@gmail.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $user->assignRole('user');
+
+13. AdminSeeder =         $user = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $user->assignRole('admin');
+
+14. Database seeder =         $this->call(RoleSeeder::class);
+        $this->call(AdminSeeder::class);
+        $this->call(UserSeeder::class);
+
+15.MODEL USER= use Spatie\Permission\Traits\HasRoles;
+
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
+
+16. php artisan migrate
+
+17. php artisan db:seed
+
+18. buat migration posts & comments = php artisan make:migration create_.._table
+
+19. buat model Komen, Post = php artisan make:model
+
+20. buat resource (search *) = php artisan make:resource
+
+21. Buat API LOGIN, REGISTER DULU
+
+22. Sisanya API
